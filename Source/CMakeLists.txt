@@ -33,7 +33,6 @@ project (DaedalusX64)
 				set (DEBUG_ONLY Core/Registers.cpp)
 				set (BUILD ${BASE_FILES} ${CONFIG_FILES} ${CORE_FILES} ${DEBUG_FILES} ${DYNAREC_FILES} ${GRAPHICS_FILES} ${HLEAUDIO_FILES} ${HLEGRAPHICS_FILES} ${INTERFACE_FILES} ${MATH_FILES} ${OSHLE_FILES} ${PLUGIN_FILES} ${ROMFILE_FILES} ${SYSTEM_FILES} ${TEST_FILES} ${UTILITY_FILES})
 
-
 				#PSP Build
 				set (PSP_DEBUG_FILES SysPSP/Debug/DaedalusAssertPSP.cpp SysPSP/Debug/DBGConsolePSP.cpp )
 				set (PSP_DVEMGR_FILES SysPSP/PRX/DveMgr/pspDveManager.S)
@@ -48,6 +47,7 @@ project (DaedalusX64)
 				set (PSP_UTILITY_FILES SysPSP/Utility/AtomicPrimitives.S SysPSP/Utility/BatteryPSP.cpp SysPSP/Utility/Buttons.cpp SysPSP/Utility/DebugMemory.cpp SysPSP/Utility/DisableFPUExceptions.S SysPSP/Utility/exception.cpp SysPSP/Utility/FastMemcpyPSP.cpp SysPSP/Utility/IOPSP.cpp SysPSP/Utility/JobManager.cpp SysPSP/Utility/ModulePSP.cpp SysPSP/Utility/ThreadPSP.cpp SysPSP/Utility/TimingPSP.cpp SysPSP/Utility/VolatileMemPSP.cpp)
 				set (GPROF_SRCS SysPSP/Debug/prof.c SysPSP/Debug/mcount.S )
 				set (PSP_MAIN_FILES SysPSP/main.cpp)
+				set (PSP_COMPILE_OPTIONS DAEDALUS_PSP DAEDALUS_ENABLE_DYNAREC DAEDALUS_PSP_USE_ME DAEDALUS_ENABLE_OS_HOOKS DAEDALUS_ENDIAN_MODE=DAEDALUS_ENDIAN_LITTLE DAEDALUS_PSP_USE_VFPU)
 
 
 				set (PSP_BUILD ${PSP_DEBUG_FILES} ${PSP_DVEMGR_FILES} ${PSP_DYNAREC_FILES} ${PSP_GRAPHICS_FILES} ${PSP_HLEAUDIO_FILES} ${PSP_HLEGRAPHICS_FILES} ${PSP_INPUTMANAGER_FILES} ${PSP_KERNELBUTTON_FILES} ${PSP_MEDIAENGINEFILES} ${PSP_UI_FILES} ${PSP_UTILITY_FILES})
@@ -93,6 +93,18 @@ project (DaedalusX64)
 				set (MAC_AUDIO SysPosix/HLEAudio/AudioPluginOSX.cpp)
 
 
+##Compiler Definitions 
+## Todo probably 
+	set(DEFAULT_OPTIONS)
+
+#DAEDALUS_COMPRESSED_ROM_SUPPORT
+#DAEDALUS_ENABLE_DYNAREC
+#DAEDALUS_ENABLE_OS_HOOKS
+#DAEDALUS_BREAKPOINTS_ENABLED
+#DAEDALUS_ENDIAN_MODE DAEDALUS_ENDIAN_LITTLE DAEDALUS_ENDIAN_BIG
+
+
+
 ## Check for debug / Profile flags, if neither are selected, do a release build instead
 # This will be more refined eventually as having macro processing tucked away sucks.
 
@@ -110,16 +122,15 @@ else()
 endif(DEBUG)
 
 if (PSP)
-	add_compile_options(-DPSP_LARGE_MEMORY=1 -DPSP_FW_VERSION=661)
-	add_definitions(-DDAEDALUS_PSP)
+	add_compile_definitions(DAEDALUS_PSP)
 	add_library(pspkubridge STATIC IMPORTED)
 	set_property(TARGET pspkubridge PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/SysPSP/Include/lib/libpspkubridge.a)
 	include_directories(BEFORE ${PROJECT_SOURCE_DIR}/SysPSP/Include)
-	add_library(daedalus STATIC ${BUILD} ${PSP_BUILD})
-	add_executable(daedalus.elf ${PSP_MAIN_FILES})
+	add_executable(daedalus.elf ${BUILD} ${PSP_BUILD} ${PSP_MAIN_FILES})
+	target_compile_definitions(daedalus.elf PRIVATE -DPSP_LARGE_MEMORY=1 -DPSP_FW_VERSION=661 ${PSP_COMPILE_OPTIONS})
 	set_target_properties(daedalus.elf PROPERTIES LINK_FLAGS "-specs=${PSPSDK}/lib/prxspecs -Wl,-q,-T${PSPSDK}/lib/linkfile.prx ${PSPSDK}/lib/prxexports.o -L${PSPSDK}/lib")
 	target_include_directories(daedalus.elf PUBLIC /usr/local/pspdev/psp/sdk/include )
-	target_link_libraries(daedalus.elf daedalus -lstdc++ -lpsppower -lpspgu -lpspaudiolib -lpspaudio -lpsprtc -lpng -lz -lc -lg -lm -lpspfpu pspkubridge ${PSPSDK_LIBS})
+	target_link_libraries(daedalus.elf -lstdc++ -lpsppower -lpspgu -lpspaudiolib -lpspaudio -lpsprtc -lpng -lz -lc -lg -lm -lpspfpu pspkubridge ${PSPSDK_LIBS})
 endif (PSP)
 
 

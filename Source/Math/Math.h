@@ -14,7 +14,6 @@ inline u32 FastRand()
 	IO_RAND = (IO_RAND << 1) | (((IO_RAND >> 31) ^ (IO_RAND >> 28)) & 1); 
 	return IO_RAND; 
 } 
-
 #ifdef DAEDALUS_PSP
 #include <pspfpu.h>
 // VFPU Math :D
