@@ -71,9 +71,10 @@ void	CheckForNewFrame()
 	if( gLastFrame != g_dwNumFrames )
 	{
 		std::vector< SFragmentCount >		LookupList;
-		for(std::map<u32, u32>::const_iterator it = gFrameLookups.begin(); it != gFrameLookups.end(); ++it)
+		for(const auto& it: gFrameLookups)
+
 		{
-			LookupList.push_back( SFragmentCount( it->second, it->first ) );
+			LookupList.push_back( SFragmentCount( it.second, itmfirst ) );
 		}
 
 		std::sort( LookupList.begin(), LookupList.end(), SortDecreasingSize() );

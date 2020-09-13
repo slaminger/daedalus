@@ -215,13 +215,13 @@ void CProfilerImpl::Update()
 	DAEDALUS_ASSERT( mActiveCallstacks.size() == mActiveItems.size(), "Why are there different numbers of callstacks/items?" );
 
 	u64 now = GetNow();
-	for( u32 i = 0; i < mActiveCallstacks.size(); ++i )
+	for (CProfileCallstack* active : mActiveCallstacks)
 	{
-		mActiveCallstacks[ i ]->StopTiming( now );
+		active->StopTiming(now);
 	}
 
 	u64 total_root_time = 0;
-	if( mActiveCallstacks.size() > 0 )
+	if( mActiveCallstacks.empty())
 	{
 		total_root_time = mActiveCallstacks[ 0 ]->GetTotalTime();
 	}
@@ -251,8 +251,7 @@ void CProfilerImpl::Update()
 	//       0         1         2         3         4         5         6         7         8
 	//       012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
 	printf( " Function                                         Time us  Parent Overall  Hits\n" );
-
-	for( u32 i = 0; i < active_callstacks.size(); ++i )
+	for(const CProfileCallStack* callstack : active_callstacks)
 	{
 		const CProfileCallstack * callstack = active_callstacks[ i ];
 
@@ -297,10 +296,9 @@ void CProfilerImpl::Update()
 		CProfileCallstack *	callstack = it->second;
 		callstack->Reset();
 	}
-
-	for( u32 i = 0; i < mActiveCallstacks.size(); ++i )
+	for(CProfileCallStack* active : mActiveCallStacks)
 	{
-		mActiveCallstacks[ i ]->StartTiming();
+		active->StartTiming();
 	}
 }
 

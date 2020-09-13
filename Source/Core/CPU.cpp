@@ -671,11 +671,9 @@ void CPU_HANDLE_COUNT_INTERRUPT()
 			if ((gVerticalInterrupts & 0x3F) == 0) // once every 60 VBLs
 				Save_Flush();
 
-				//TESTING
-			for (size_t i = 0; i < gVblCallbacks.size(); ++i)
+			for (const auto& callback : gVblCallbacks)
 			{
-				VblCallback & callback = gVblCallbacks[i];
-				callback.Fn(callback.Arg);
+					callback.Fn(callback.Arg);
 			}
 
 			HandleSaveStateOperationOnVerticalBlank();

@@ -88,8 +88,8 @@ CFragment::CFragment( CCodeBufferManager * p_manager,
 ,	mpIndirectExitMap( need_indirect_exit_map ? new CIndirectExitMap : nullptr )
 #ifdef FRAGMENT_RETAIN_ADDITIONAL_INFO
 ,	mHitCount( 0 )
-,	mTraceBuffer( trace )
-,	mBranchBuffer( branch_details )
+,	mTraceBuffer()
+,	mBranchBuffer()
 ,	mExitAddress( exit_address )
 #endif
 #ifdef FRAGMENT_SIMULATE_EXECUTION
@@ -1015,7 +1015,7 @@ void CFragment::DumpFragmentInfoHtml( FILE * fh, u64 total_cycles ) const
 
 	fputs( "<h2>Spans</h2>\n", fh );
 	fputs( "<div align=\"center\"><pre>\n", fh );
-	for(RegisterSpanList::const_iterator span_it = mRegisterUsage.SpanList.begin(); span_it < mRegisterUsage.SpanList.end(); ++span_it )
+	for(const auto& span : mRegisterUsage.SpanList)
 	{
 		const SRegisterSpan &	span( *span_it );
 
@@ -1052,12 +1052,11 @@ void CFragment::DumpFragmentInfoHtml( FILE * fh, u64 total_cycles ) const
 		fputs( "<h2>Input Disassembly</h2>\n", fh );
 		fputs( "<div align=\"center\"><table><tr><th>Address</th><th>Instruction</th><th>Exit Target</th></tr>\n", fh );
 		u32			last_address( mTraceBuffer.size() > 0 ? mTraceBuffer[ 0 ].Address-4 : 0 );
-		for( u32 i = 0; i < mTraceBuffer.size(); ++i )
+		for const auto& entry : mTraceBuffer)
 		{
-			const STraceEntry &	entry( mTraceBuffer[ i ] );
-			u32					address( entry.Address );
-			OpCode				op_code( entry.OpCode );
-			u32					branch_index( entry.BranchIdx );
+			u32 address( entry.Address );
+			OpCode op_code( entry.OpCode );
+			u32 branch_index( entry.BranchIdx );
 
 			char				buf[100];
 			SprintOpCodeInfo( buf, address, op_code );
@@ -1080,7 +1079,7 @@ void CFragment::DumpFragmentInfoHtml( FILE * fh, u64 total_cycles ) const
 		fputs( "</table></div>\n", fh );
 	}
 
-
+	#if defined(DAEDALUS_W32)
 	if( mEntryPoint.IsSet() )
 	{
 		fputs( "<h2>Disassembly</h2>\n", fh );
@@ -1134,6 +1133,7 @@ void CFragment::DumpFragmentInfoHtml( FILE * fh, u64 total_cycles ) const
 		fputs( "</table></div>\n", fh );
 	}
 
+#endif
 	fputs( "</body></html>\n", fh );
 }
 #endif // DAEDALUS_DEBUG_DYNAREC
