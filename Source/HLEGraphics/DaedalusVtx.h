@@ -26,26 +26,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Math/Vector4.h"
 
 
-// The ordering of these elements is required for the VectorTnL code.
-ALIGNED_TYPE(struct, DaedalusVtx4, 16)
+
+struct DaedalusVtx4
 {
-    v4	TransformedPos;
-    v4	ProjectedPos;
-    v4	Colour;
-    v2	Texture;
+	v4 TransformedPos;
+	v4 ProjectedPos;
+	v4 Colour;
+	v2 Texture;
 
-	u32	ClipFlags;
-	u32 Pad;
+	u32 ClipFlags;
 
-	void Interpolate( const DaedalusVtx4 & lhs, const DaedalusVtx4 & rhs, float factor );
+	void Interpolate(const DaedalusVtx4& lhs, const DaedalusVtx4& rhs, float factor);
+
+	void InitClipFlags();
+	void SetColour(const v3& col, f32 a);
+
+	void GenerateTexCoord(const v3& norm, bool linear, bool mario_hack);
 };
-
-DAEDALUS_STATIC_ASSERT( sizeof(DaedalusVtx4) == 64 );
 
 struct TexCoord
 {
-	s16		s;
-	s16		t;
+	s16 s;
+	s16 t;
 
 	TexCoord()
 	{
@@ -53,10 +55,8 @@ struct TexCoord
 	TexCoord(s16 s_, s16 t_) : s(s_), t(t_)
 	{
 	}
-	TexCoord(float s_, float t_) : s( (s16)(s_ * 32.f) ), t( (s16)(t_ * 32.f) )
-	{
-	}
 };
+
 
 // The ordering of these elements is determined by the PSP hardware
 struct DaedalusVtx

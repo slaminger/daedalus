@@ -11,15 +11,16 @@
 // #undef	DAEDALUS_ENDIAN_MODE					// Define this to specify whether the platform is big or little endian
 
 // DAEDALUS_ENDIAN_MODE should be defined as one of:
-//
-#define DAEDALUS_ENDIAN_LITTLE 1
-#define DAEDALUS_ENDIAN_BIG 2
 
 //
 //	Set up your preprocessor flags to search Source/SysXYZ/Include first, where XYZ is your target platform
 //	If certain options are not defined, defaults are provided below
 //
+#ifdef DAEDALUS_PSP
+
 #include "Platform.h"
+#endif
+// Needed for PSP Cache aliasing.
 #ifndef MAKE_UNCACHED_PTR
 #define MAKE_UNCACHED_PTR(x)	(x)
 #endif
