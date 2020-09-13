@@ -24,9 +24,5 @@
 #define MAKE_UNCACHED_PTR(x)	(x)
 #endif
 
-//
-//	Configuration options. These are not really platform-specific, but control various features
-//
-#include "BuildConfig.h"
 
 #endif // BUILDOPTIONS_H_

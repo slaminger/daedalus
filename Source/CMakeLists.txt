@@ -14,7 +14,6 @@ set(CMAKE_CXX_STANDARD 14)
 project (DaedalusX64)
 
 				#Default Files for build
-				set (BASE_FILES StdAfx.cpp)
 				set (CONFIG_FILES Config/ConfigOptions.cpp)
 				set (CORE_FILES Core/HvqmTask.cpp Core/RDRam.cpp Core/Cheats.cpp Core/CPU.cpp Core/DMA.cpp Core/Dynamo.cpp Core/FlashMem.cpp  Core/FramerateLimiter.cpp Core/Interpret.cpp Core/Interrupt.cpp Core/JpegTask.cpp Core/Memory.cpp Core/PIF.cpp Core/PrintOpCode.cpp Core/R4300.cpp Core/Registers.cpp Core/ROM.cpp Core/ROMBuffer.cpp Core/ROMImage.cpp Core/RomSettings.cpp Core/RSP_HLE.cpp Core/Save.cpp Core/TLB.cpp)
 				set (DEBUG_FILES Debug/DebugConsoleImpl.cpp Debug/DebugLog.cpp Debug/Dump.cpp Debug/Synchroniser.cpp)
@@ -31,7 +30,7 @@ project (DaedalusX64)
 				set (UTILITY_FILES Utility/CRC.cpp Utility/FastMemcpy.cpp Utility/Hash.cpp Utility/IniFile.cpp Utility/MemoryHeap.cpp  Utility/Profiler.cpp  Utility/Stream.cpp Utility/StringUtil.cpp Utility/Timer.cpp  Utility/Translate.cpp )
 				set (UNKNOWN_FILES Utility/FastMemcpy_test.cpp Utility/MemoryPool.cpp)
 				set (DEBUG_ONLY Core/Registers.cpp)
-				set (BUILD ${BASE_FILES} ${CONFIG_FILES} ${CORE_FILES} ${DEBUG_FILES} ${DYNAREC_FILES} ${GRAPHICS_FILES} ${HLEAUDIO_FILES} ${HLEGRAPHICS_FILES} ${INTERFACE_FILES} ${MATH_FILES} ${OSHLE_FILES} ${PLUGIN_FILES} ${ROMFILE_FILES} ${SYSTEM_FILES} ${TEST_FILES} ${UTILITY_FILES})
+				set (BUILD ${CONFIG_FILES} ${CORE_FILES} ${DEBUG_FILES} ${DYNAREC_FILES} ${GRAPHICS_FILES} ${HLEAUDIO_FILES} ${HLEGRAPHICS_FILES} ${INTERFACE_FILES} ${MATH_FILES} ${OSHLE_FILES} ${PLUGIN_FILES} ${ROMFILE_FILES} ${SYSTEM_FILES} ${TEST_FILES} ${UTILITY_FILES})
 
 				#PSP Build
 				set (PSP_DEBUG_FILES SysPSP/Debug/DaedalusAssertPSP.cpp SysPSP/Debug/DBGConsolePSP.cpp )
@@ -87,15 +86,20 @@ project (DaedalusX64)
 				set (POSIX_MAIN_FILES SysPosix/main.cpp)
 				set (POSIX_UTILITY SysPosix/Utility/CondPosix.cpp SysPosix/Utility/IOPosix.cpp SysPosix/Utility/ThreadPosix.cpp SysPosix/Utility/TimingPosix.cpp)
 				set (POSIX_BUILD ${POSIX_DEBUG} ${POSIX_DYNAREC} ${POSIX_HLEGRAPHICS} ${POSIX_UTILITY})
-
+				set (POSIX_COMPILE_OPTIONS
+										DAEDALUS_COMPRESSED_ROM_SUPPORT
+										DAEDALUS_ENABLE_OS_HOOKS
+										DAEDALUS_ACCURATE_TMEM
+										DAEDALUS_ENDIAN_MODE=DAEDALUS_ENDIAN_LITTLE
+										)
+										
 				# These will remain separate for now..
 				set (LINUX_AUDIO SysPosix/HLEAudio/AudioPluginLinux.cpp)
 				set (MAC_AUDIO SysPosix/HLEAudio/AudioPluginOSX.cpp)
 
 
 ##Compiler Definitions 
-## Todo probably 
-	set(DEFAULT_OPTIONS)
+## Todo Need a better way to set these options
 
 #DAEDALUS_COMPRESSED_ROM_SUPPORT
 #DAEDALUS_ENABLE_DYNAREC
@@ -103,6 +107,23 @@ project (DaedalusX64)
 #DAEDALUS_BREAKPOINTS_ENABLED
 #DAEDALUS_ENDIAN_MODE DAEDALUS_ENDIAN_LITTLE DAEDALUS_ENDIAN_BIG
 
+#undef	DAEDALUS_DEBUG_PIF					// Enable to enable various debugging options for PIF (Peripheral interface)
+#undef	DAEDALUS_DEBUG_CONSOLE				// Enable debug console
+#undef  DAEDALUS_DEBUG_DYNAREC				// Enable to enable various debugging options for the dynarec
+#undef  DAEDALUS_ENABLE_SYNCHRONISATION		// Enable for sync testing
+#undef  DAEDALUS_LOG						// Enable various logging
+#undef DAEDALUS_ENABLE_ASSERTS				// Enable asserts
+#undef  DAEDALUS_DEBUG_DISPLAYLIST			// Enable the display list debugger
+#undef  DAEDALUS_ENABLE_PROFILING			// Enable the built-in profiler
+#undef  DAEDALUS_PROFILE_EXECUTION			// Enable to keep track of various execution stats
+#undef  DAEDALUS_BATCH_TEST_ENABLED			// Enable the batch test
+#undef	DAEDALUS_DEBUG_MEMORY
+#undef	ALLOW_TRACES_WHICH_EXCEPT
+#define DAEDALUS_SILENT						// Undef to enable debug messages
+#undef  DAEDALUS_IS_LEGACY					// Old code, unused etc.. Kept for reference, undef to save space on the elf. Will remove soon.
+#undef	DAEDALUS_DIALOGS					// Enable this to show dialogs in the gui
+
+#define DAEDALUS_PSP_GPROF
 
 
 ## Check for debug / Profile flags, if neither are selected, do a release build instead
@@ -110,19 +131,32 @@ project (DaedalusX64)
 
 if(DEBUG)
 	message("Debug Build")
-	include_directories(${PROJECT_SOURCE_DIR}/Base/Dev)
+	add_compile_definitions(DAEDALUS_CONFIG_VERSION="Dev"
+							DAEDALUS_DEBUG_CONSOLE
+							DAEDALUS_DEBUG_DISPLAYLIST
+							DAEDALUS_ENABLE_ASSERTS
+							DAEDALUS_BATCH_TEST_ENABLED
+							DAEDALUS_LOG
+							)
 	add_definitions("-g -O2 -G0 -D_DEBUG -MD -Wall")
 elseif(PROFILE)
 	message("Profile Build")
-	include_directories(${PROJECT_SOURCE_DIR}/Base/Profile)
+	add_compile_definitions(DAEDALUS_CONFIG_VERSION="PSP GPROF"
+								DAEDALUS_SILENT
+								DAEDALUS_PSP_GPROF
+								)
 else()
 	message("Release Build")
-	include_directories(${PROJECT_SOURCE_DIR}/Base/Release)
+	add_compile_definitions(DAEDALUS_CONFIG_VERSION="Release"
+							DAEDALUS_DIALOGS
+							DAEDALUS_SILENT
+							)
 	add_definitions("-DNDEBUG -O2 -W ")
 endif(DEBUG)
 
 if (PSP)
-	add_compile_definitions(DAEDALUS_PSP)
+	add_compile_definitions(DAEDALUS_PSP 
+							)
 	add_library(pspkubridge STATIC IMPORTED)
 	set_property(TARGET pspkubridge PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/SysPSP/Include/lib/libpspkubridge.a)
 	include_directories(BEFORE ${PROJECT_SOURCE_DIR}/SysPSP/Include)

@@ -22,40 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef SYSPSP_INCLUDE_PLATFORM_H_
 #define SYSPSP_INCLUDE_PLATFORM_H_
 
+ #define MAKE_UNCACHED_PTR(x)	(reinterpret_cast< void * >( reinterpret_cast<u32>( (x) ) | 0x40000000 ))
 
-enum PspModel
-{
-    PSP_MODEL_STANDARD = 0,
-    PSP_MODEL_SLIM_AND_LITE = 1,
-    PSP_MODEL_BRITE = 8,
-    PSP_MODEL_GO = 4,
-    PSP_MODEL_STREET = 10
-};
-//
-//	Make sure this platform is defined correctly
-// //
-// #ifndef DAEDALUS_PSP
-// #define DAEDALUS_PSP
-// #endif
-
-// #define DAEDALUS_ENABLE_DYNAREC
-// #define DAEDALUS_PSP_USE_ME
-// #define DAEDALUS_ENABLE_OS_HOOKS
-//#define DAEDALUS_ACCURATE_TMEM
-
-// #define DAEDALUS_ENDIAN_MODE DAEDALUS_ENDIAN_LITTLE
-
-#define DAEDALUS_ATTRIBUTE_NOINLINE __attribute__((noinline))
-
-#define DAEDALUS_HALT			__asm__ __volatile__ ( "break" )
-
-#define DAEDALUS_DYNAREC_HALT	SW(PspReg_R0, PspReg_R0, 0)
-
-#define MAKE_UNCACHED_PTR(x)	(reinterpret_cast< void * >( reinterpret_cast<u32>( (x) ) | 0x40000000 ))
-
-#define DAEDALUS_ATTRIBUTE_PURE   __attribute__((pure))
-#define DAEDALUS_ATTRIBUTE_CONST   __attribute__((const))
-
-#define __has_feature(x) 0
 
 #endif // SYSPSP_INCLUDE_PLATFORM_H_
